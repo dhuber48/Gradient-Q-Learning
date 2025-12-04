@@ -30,15 +30,20 @@ class Agent:
 
         # Track learning progress
         self.training_error = []
+        self.reward_sum = 0
+        self.last_action = 0
+
+        self.step_counter = 1
+        self.discretization_bins = 10
 
     #will need to change obs and action type to match cartpole observation space
     def get_action(self, obs: tuple[int, int, bool]) -> int:
         # Discretize continuous CartPole observation with finer bins for each dimension
         obs = (
-            np.digitize(obs[0], np.linspace(-2.4, 2.4, 20)),
-            np.digitize(obs[1], np.linspace(-4, 4, 20)),
-            np.digitize(obs[2], np.linspace(-0.2, 0.2, 20)),
-            np.digitize(obs[3], np.linspace(-4, 4, 20)),
+            np.digitize(obs[0], np.linspace(-2.4, 2.4, self.discretization_bins)),
+            np.digitize(obs[1], np.linspace(-4, 4, self.discretization_bins)),
+            np.digitize(obs[2], np.linspace(-0.2, 0.2, self.discretization_bins)),
+            np.digitize(obs[3], np.linspace(-4, 4, self.discretization_bins)),
         )
         
         # With probability epsilon: explore (random action)
@@ -57,21 +62,27 @@ class Agent:
         terminated: bool,
         next_obs: tuple[int, int, bool],
     ):
-        """Update Q-values based on agent's experience."""
-        # Discretize continuous CartPole observations with finer bins for each dimension
+
+        # Discretize continuous CartPole observations with bins for each dimension
         obs = (
-            np.digitize(obs[0], np.linspace(-2.4, 2.4, 20)),
-            np.digitize(obs[1], np.linspace(-4, 4, 20)),
-            np.digitize(obs[2], np.linspace(-0.2, 0.2, 20)),
-            np.digitize(obs[3], np.linspace(-4, 4, 20)),
+            np.digitize(obs[0], np.linspace(-2.4, 2.4, self.discretization_bins)),
+            np.digitize(obs[1], np.linspace(-4, 4, self.discretization_bins)),
+            np.digitize(obs[2], np.linspace(-0.2, 0.2, self.discretization_bins)),
+            np.digitize(obs[3], np.linspace(-4, 4, self.discretization_bins)),
         )
         next_obs = (
-            np.digitize(next_obs[0], np.linspace(-2.4, 2.4, 20)),
-            np.digitize(next_obs[1], np.linspace(-4, 4, 20)),
-            np.digitize(next_obs[2], np.linspace(-0.2, 0.2, 20)),
-            np.digitize(next_obs[3], np.linspace(-4, 4, 20)),
+            np.digitize(next_obs[0], np.linspace(-2.4, 2.4, self.discretization_bins)),
+            np.digitize(next_obs[1], np.linspace(-4, 4, self.discretization_bins)),
+            np.digitize(next_obs[2], np.linspace(-0.2, 0.2, self.discretization_bins)),
+            np.digitize(next_obs[3], np.linspace(-4, 4, self.discretization_bins)),
         )
         
+        if not terminated:
+            self.step_counter += 1
+        else:
+            self.step_counter = 1
+
+        #Update Q-values based on agent's experience
         future_q_value = (not terminated) * np.max(self.q_values[next_obs]) #max_a: Q(S_t+1, a)
 
         # What should the Q-value be? (Bellman equation)
@@ -79,6 +90,19 @@ class Agent:
 
         # How wrong was our current estimate?
         temporal_difference = target - self.q_values[obs][action] #TD error: target - Q(S_t, A_t)
+
+        #udpating learning rate with respect to derivative of reward:
+
+        # if action != self.last_action:  #avoid division by zero
+        #     self.lr *= (reward + self.reward_sum - self.reward_sum)/(action-self.last_action) #+ 1e-5)  #add small constant to avoid division by zero
+        # print(f"Action: {action}")
+        # print(f"Updated learning rate: {self.lr}")
+
+        # self.reward_sum += reward
+        # self.last_action = action
+
+        self.lr = max(0.01, min(1.0, self.lr*(1- .1* 0.01 * self.step_counter**(-0.99)) ))  #differentiable learning rate decays based on derivative of reward, with truncation between 0.01 and 1.0.
+        #print(f"Differentiable learning rate: {self.lr}")
 
         # Update our estimate in the direction of the error
         # Learning rate controls how big steps we take
@@ -92,3 +116,7 @@ class Agent:
     def decay_epsilon(self):
         """Reduce exploration rate after each episode."""
         self.epsilon = max(self.final_epsilon, self.epsilon - self.epsilon_decay)
+
+    def differentiable_epsilon(self): #this is not going to work because we can't change epsilon so drastically within each episode.
+        self.epsilon = self.epsilon *(1+ 0.01 * self.step_counter**(-0.99))  #example decay based on step count
+        print(f"Differentiable epsilon: {self.epsilon}")
