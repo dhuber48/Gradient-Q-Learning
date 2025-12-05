@@ -3,7 +3,7 @@ import gymnasium as gym
 import numpy as np
 
 
-#Note: This q-learning agent taken from farama gym's tutorial:
+#Note: This q-learning agent is a modified version of the one from farama gym's tutorial:
 class Agent:
     def __init__(
             self,
@@ -12,6 +12,7 @@ class Agent:
             initial_epsilon: float, #initial_epsilon: Starting exploration rate (usually 1.0)
             epsilon_decay: float, #epsilon_decay: How much to reduce epsilon each episode
             final_epsilon: float, #final_epsilon: Minimum exploration rate (usually 0.1)
+            sigma: float, #sigma: parameter for VDBE
             discount_factor: float = 0.95, #discount_factor: How much to value future rewards (0-1)
         ):
         self.env = env
@@ -33,8 +34,10 @@ class Agent:
         self.reward_sum = 0
         self.last_action = 0
 
+        self.sigma = sigma
+
         self.step_counter = 1
-        self.discretization_bins = 10
+        self.discretization_bins = 6
 
     #will need to change obs and action type to match cartpole observation space
     def get_action(self, obs: tuple[int, int, bool]) -> int:
@@ -91,20 +94,17 @@ class Agent:
         # How wrong was our current estimate?
         temporal_difference = target - self.q_values[obs][action] #TD error: target - Q(S_t, A_t)
 
-        #udpating learning rate with respect to derivative of reward:
+        #Implementing basic VDBE
+        #Note: can replace tanh with a different squashing function later. VDBE uses tanh(x/2)
+        #surprise = -np.tanh(-np.abs(self.lr*temporal_difference)/self.sigma)
+        surprise = np.tanh(np.abs(temporal_difference)/self.sigma)
 
-        # if action != self.last_action:  #avoid division by zero
-        #     self.lr *= (reward + self.reward_sum - self.reward_sum)/(action-self.last_action) #+ 1e-5)  #add small constant to avoid division by zero
-        # print(f"Action: {action}")
-        # print(f"Updated learning rate: {self.lr}")
 
-        # self.reward_sum += reward
-        # self.last_action = action
+        #surprise  = (1-np.exp(-self.lr*np.abs(temporal_difference)/self.sigma)) / (1 + np.exp(-self.lr*np.abs(temporal_difference)/self.sigma))
+        responsiveness = 0.1 #delta in VDBE paper (1/number of actions in current state). Currently have discretion into 10 bins.
+        self.epsilon = (1 - responsiveness) * self.epsilon + (responsiveness * surprise)
 
-        self.lr = max(0.01, min(1.0, self.lr*(1- .1* 0.01 * self.step_counter**(-0.99)) ))  #differentiable learning rate decays based on derivative of reward, with truncation between 0.01 and 1.0.
-        #print(f"Differentiable learning rate: {self.lr}")
-
-        # Update our estimate in the direction of the error
+        # Update estimate in the direction of the error
         # Learning rate controls how big steps we take
         self.q_values[obs][action] = (
             self.q_values[obs][action] + self.lr * temporal_difference
@@ -116,7 +116,3 @@ class Agent:
     def decay_epsilon(self):
         """Reduce exploration rate after each episode."""
         self.epsilon = max(self.final_epsilon, self.epsilon - self.epsilon_decay)
-
-    def differentiable_epsilon(self): #this is not going to work because we can't change epsilon so drastically within each episode.
-        self.epsilon = self.epsilon *(1+ 0.01 * self.step_counter**(-0.99))  #example decay based on step count
-        print(f"Differentiable epsilon: {self.epsilon}")

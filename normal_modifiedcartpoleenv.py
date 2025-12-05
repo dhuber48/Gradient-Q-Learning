@@ -2,7 +2,9 @@ from collections import defaultdict
 import gymnasium as gym
 import random, numpy as np
 from tqdm import tqdm
-from cartPoleAgent import Agent
+from normal_cartPoleAgent import Agent
+import time
+
 
 # Using wrapper to make reward differentiable
 class RewardWrapper(gym.Wrapper):
@@ -27,14 +29,14 @@ class RewardWrapper(gym.Wrapper):
 
 #based on farama gym tutorial code:
 learning_rate = 0.2        # How fast to learn (higher = faster but less stable)
-n_episodes = 1000       # Number of episodes to train on
+n_episodes = 2000       # Number of episodes to train on
 start_epsilon = 1.0         # Start with 100% random actions
 epsilon_decay = start_epsilon / n_episodes  # Reduce exploration over time
 final_epsilon = 0.0        # Always keep some exploration
 
 # Create our training environment - a cart with a pole that needs balancing
 env = gym.make("CartPole-v1")
-env = RewardWrapper(env)
+#env = RewardWrapper(env)
 env = gym.wrappers.RecordEpisodeStatistics(env, buffer_length=n_episodes)
 
 # Initialize agent
@@ -45,11 +47,6 @@ agent = Agent(
     epsilon_decay=epsilon_decay,
     final_epsilon=final_epsilon,
 )
-
-##Idea: decay epsilon based on rate of change of total reward for a given episode. 
-# If reward is increasing, decay epsilon faster to exploit. 
-# If reward is decreasing, decay epsilon slower (or even increase epsilon) to explore more.
-# If reward is stagnant, decay epsilon at normal rate or keep epsilon constant.
 
 # Training loop
 for episode in tqdm(range(n_episodes)):
@@ -68,13 +65,9 @@ for episode in tqdm(range(n_episodes)):
 env.close()
 
 
-
 # Show final trained agent
-import time
-#env = gym.make("CartPole-v1", render_mode="human")
-eval_env = RewardWrapper(gym.make("CartPole-v1", render_mode="human"))
-
-
+eval_env = gym.make("CartPole-v1", render_mode="human")
+#eval_env = RewardWrapper(gym.make("CartPole-v1", render_mode="human"))
 for i in range(5):
     observation, info = eval_env.reset()
     episode_over = False

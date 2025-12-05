@@ -2,7 +2,7 @@ from collections import defaultdict
 import gymnasium as gym
 import random, numpy as np
 from tqdm import tqdm
-from cartPoleAgent import Agent
+from normal_cartPoleAgent import Agent
 
 
 #based on farama gym tutorial code:
