@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+
+
 from collections import defaultdict
 import gymnasium as gym
 import numpy as np
@@ -10,10 +13,8 @@ class Agent:
             env: gym.Env,  # env: The training environment
             learning_rate: float, #learning_rate: How quickly to update Q-values (0-1)
             initial_epsilon: float, #initial_epsilon: Starting exploration rate (usually 1.0)
-            sigma: float, #scaling parameter for VDBE
-            delta: float, #quantifies magnitude of VDBE update
+            sigma: float, #sigma: parameter for VDBE
             discount_factor: float = 0.95, #discount_factor: How much to value future rewards (0-1)
-            
         ):
         self.env = env
 
@@ -27,9 +28,7 @@ class Agent:
         # Exploration parameters
         self.epsilon = initial_epsilon
 
-        #VDBE params
         self.sigma = sigma
-        self.delta = delta
 
         self.step_counter = 1
         self.discretization_bins = 6
@@ -89,12 +88,18 @@ class Agent:
         temporal_difference = target - self.q_values[obs][action] #TD error: target - Q(S_t, A_t)
 
         #Implementing basic VDBE
+        #Note: can replace tanh with a different squashing function later. VDBE uses tanh(lr*x/2)
+        #surprise = -np.tanh(-np.abs(self.lr*temporal_difference)/self.sigma) SAME THING
         surprise = np.tanh(np.abs(temporal_difference)/self.sigma)
 
-        responsiveness = self.delta #delta in VDBE paper (1/number of actions in current state). 
+        #ACCELERATION IMPLEMENTATION
+        surprise_gradient = 1-surprise**2/self.sigma
+        responsiveness = surprise_gradient #delta in VDBE paper
         self.epsilon = (1 - responsiveness) * self.epsilon + (responsiveness * surprise)
 
         # Update estimate in the direction of the error
         self.q_values[obs][action] = (
             self.q_values[obs][action] + self.lr * temporal_difference
         ) #Q(S_t, A_t) += alpha * TD error
+
+

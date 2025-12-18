@@ -3,7 +3,7 @@ import gymnasium as gym
 import numpy as np
 
 
-#Note: This q-learning agent taken from farama gym's tutorial:
+#Note: This q-learning agent code is heavily based on the one from farama gym's tutorial:
 class Agent:
     def __init__(
             self,
@@ -28,17 +28,11 @@ class Agent:
         self.epsilon_decay = epsilon_decay
         self.final_epsilon = final_epsilon
 
-        # Track learning progress
-        self.training_error = []
-        self.reward_sum = 0
-        self.last_action = 0
-
         self.step_counter = 1
         self.discretization_bins = 10
 
-    #will need to change obs and action type to match cartpole observation space
     def get_action(self, obs: tuple[int, int, bool]) -> int:
-        # Discretize continuous CartPole observation with finer bins for each dimension
+        #Discretize continuous CartPole observation with bins for each dimension
         obs = (
             np.digitize(obs[0], np.linspace(-2.4, 2.4, self.discretization_bins)),
             np.digitize(obs[1], np.linspace(-4, 4, self.discretization_bins)),
@@ -46,11 +40,11 @@ class Agent:
             np.digitize(obs[3], np.linspace(-4, 4, self.discretization_bins)),
         )
         
-        # With probability epsilon: explore (random action)
+        # With probability epsilon: explore random action
         if np.random.random() < self.epsilon:
             return self.env.action_space.sample()
 
-        # With probability (1-epsilon): exploit (best known action)
+        # With probability (1-epsilon): exploit best known action
         else:
             return int(np.argmax(self.q_values[obs]))
 
@@ -63,7 +57,7 @@ class Agent:
         next_obs: tuple[int, int, bool],
     ):
 
-        # Discretize continuous CartPole observations with bins for each dimension
+        #Discretize continuous CartPole observations with bins for each dimension
         obs = (
             np.digitize(obs[0], np.linspace(-2.4, 2.4, self.discretization_bins)),
             np.digitize(obs[1], np.linspace(-4, 4, self.discretization_bins)),
@@ -85,13 +79,14 @@ class Agent:
         #Update Q-values based on agent's experience
         future_q_value = (not terminated) * np.max(self.q_values[next_obs]) #max_a: Q(S_t+1, a)
 
-        # What should the Q-value be? (Bellman equation)
+        #Bellman equation to update Q-values
         target = reward + self.discount_factor * future_q_value #R_t+1 + gamma * max_a Q(S_t+1, a)
 
-        # How wrong was our current estimate?
+        #How wrong was our current estimate?
         temporal_difference = target - self.q_values[obs][action] #TD error: target - Q(S_t, A_t)
 
-        self.lr = max(0.01, min(1.0, self.lr*(1- .1* 0.01 * self.step_counter**(-0.99)) ))  #differentiable learning rate decays based on derivative of reward, with truncation between 0.01 and 1.0.
+        #self.lr = max(0.01, min(1.0, self.lr*(1- .1* 0.01 * self.step_counter**(-0.99)) ))  
+        #differentiable learning rate decays based on derivative of reward, with truncation between 0.01 and 1.0.
         #print(f"Differentiable learning rate: {self.lr}")
 
         # Update our estimate in the direction of the error
@@ -100,8 +95,6 @@ class Agent:
             self.q_values[obs][action] + self.lr * temporal_difference
         ) #Q(S_t, A_t) += alpha * TD error
 
-        # Track learning progress (useful for debugging)
-        self.training_error.append(temporal_difference)
 
     def decay_epsilon(self):
         """Reduce exploration rate after each episode."""

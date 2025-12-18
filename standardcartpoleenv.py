@@ -7,7 +7,7 @@ from normal_cartPoleAgent import Agent
 
 #based on farama gym tutorial code:
 learning_rate = 0.2        # How fast to learn (higher = faster but less stable)
-n_episodes = 2000       # Number of hands to practice
+n_episodes = 5000       # Number of episodes to practice
 start_epsilon = 1.0         # Start with 100% random actions
 epsilon_decay = start_epsilon / n_episodes  # Reduce exploration over time
 final_epsilon = 0.0        # Always keep some exploration

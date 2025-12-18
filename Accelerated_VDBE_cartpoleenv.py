@@ -1,8 +1,10 @@
+#!/usr/bin/env python3
+
 from collections import defaultdict
 import gymnasium as gym
 import random, numpy as np
 from tqdm import tqdm
-from VDBE_cartPoleAgent import Agent
+from Accelerated_VDBE_cartPoleAgent import Agent
 import time
 import matplotlib.pyplot as plt
 
@@ -10,14 +12,11 @@ import matplotlib.pyplot as plt
 learning_rate = 0.2        # How fast to learn (higher = faster but less stable)
 n_episodes = 100000       # Max number of episodes
 start_epsilon = 1.0         # Start with 100% random actions
-#epsilon_decay = start_epsilon / n_episodes  # Not used but needed for agent code
-#final_epsilon = 0.0        # Not used but needed for agent code
-sigma = 20    #parameter for VDBE, approx equal to max discounted reward
-delta = 0.1 #VDBE surprise influence parameter
+sigma = 20    #parameter for VDBE, approx equal to max discounted reward 
 reward_list = []
 
 # Stop training criteria
-SOLVED_AVG_REWARD = 200 #475.0 #CHANGE TO WHATEVER YOU WANT FOR TESTING
+SOLVED_AVG_REWARD = 200 #SET THIS TO WHATEVER YOU WANT FOR TESTING
 SOLVED_WINDOW = 100
 
 # Create training environment - a cart with a pole that needs balancing
@@ -29,10 +28,7 @@ agent = Agent(
     env=env,
     learning_rate=learning_rate,
     initial_epsilon=start_epsilon,
-    #epsilon_decay=epsilon_decay,
-    #final_epsilon=final_epsilon,
-    sigma=sigma,
-    delta = delta
+    sigma=sigma
 )
 
 
