@@ -2,6 +2,7 @@ from collections import defaultdict
 import gymnasium as gym
 import numpy as np
 
+#THIS IS STANDARD Q-LEARNING
 
 #Note: This q-learning agent code is heavily based on the one from farama gym's tutorial:
 class Agent:

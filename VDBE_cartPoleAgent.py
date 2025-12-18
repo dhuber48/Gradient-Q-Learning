@@ -2,6 +2,7 @@ from collections import defaultdict
 import gymnasium as gym
 import numpy as np
 
+#THIS IS NORMAL VDBE Q-LEARNING (BY TOKIC AND PALM)
 
 #Note: This q-learning agent is a modified version of the one from farama gym's tutorial:
 class Agent:

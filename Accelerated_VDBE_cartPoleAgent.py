@@ -5,6 +5,7 @@ from collections import defaultdict
 import gymnasium as gym
 import numpy as np
 
+#THIS IS ACCELERATED VDBE Q-LEARNING (MY ALGORITHM)
 
 #Note: This q-learning agent is a modified version of the one from farama gym's tutorial:
 class Agent:

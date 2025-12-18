@@ -6,6 +6,8 @@ from VDBE_cartPoleAgent import Agent
 import time
 import matplotlib.pyplot as plt
 
+#THIS IS FOR NORMAL VDBE Q-LEARNING (BY TOKIC AND PALM)
+
 #based on farama gym tutorial code:
 learning_rate = 0.2        # How fast to learn (higher = faster but less stable)
 n_episodes = 100000       # Max number of episodes

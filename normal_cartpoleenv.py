@@ -4,6 +4,7 @@ import random, numpy as np
 from tqdm import tqdm
 from normal_cartPoleAgent import Agent
 
+#THIS IS FOR STANDARD Q-LEARNING
 
 #based on farama gym tutorial code:
 learning_rate = 0.2        # How fast to learn (higher = faster but less stable)
