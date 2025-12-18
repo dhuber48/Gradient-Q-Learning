@@ -15,7 +15,7 @@ To test my three individual agents, run the `(agent name)_cartpoleenv.py` files.
 * These execute one training cycle of their respective agents and will plot a graph of the agent's performance (y-axis) versus episode number (x-axis). 
 * After exiting the graph, an animation will appear of the trained agent operating the cartpole. 
 
-**Configuration:** If you want to change the average number of episodes or solving window required to consider an agent, you can do that at the top of the `(agent name)_env.py` files (except for normal Q-learning, which runs for a set number of episodes, which can also be changed at the top of the relevant env script)
+**Configuration:** If you want to change the average number of episodes or solving window required to consider an agent, you can do that at the top of the `(agent name)_cartpoleenv.py` files (except for normal Q-learning, which runs for a set number of episodes, which can also be changed at the top of the `normal_cartpoleenv.py` script).
 
 ### File Descriptions
 
