@@ -32,6 +32,6 @@ To test my three individual agents, run the `(agent name)_cartpoleenv.py` files.
 
 ## References
 
-1.  Tokic, Michel, and G¨unther Palm. Value-Difference Based Exploration: Adaptive Control between Epsilon-Greedy and Softmax. KI’11: Proceedings of the 34th Annual German conference on Advances in artificial intelligence, 4 Oct. 2011. https://www.tokic.com/www/tokicm/publikationen/papers/KI2011.pdf
+1.  Tokic, Michel, and Palm, Gunther. Value-Difference Based Exploration: Adaptive Control between Epsilon-Greedy and Softmax. KI’11: Proceedings of the 34th Annual German conference on Advances in artificial intelligence, 4 Oct. 2011. https://www.tokic.com/www/tokicm/publikationen/papers/KI2011.pdf
 2.  Sutton, R. S., & Barto, A. G. (2021). Reinforcement Learning an Introduction. MTM.
 3.  Farama Foundation. (2025). Gymnasium documentation. Cart Pole -Gymnasium Documentation. https://gymnasium.farama.org/environments/
